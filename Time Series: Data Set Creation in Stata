@@ -1,0 +1,296 @@
+Code for creating Time Series data set in Stata
+Source of data: Bureau of Labor Statistics Consumer Expenditure Survey PUMD Dataset FMLI files. Accessible at: https://www.bls.gov/cex/pumd_data.htm#stata
+
+
+
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+forvalues i = 0(1)9 {
+local j = `i' + 1
+
+use "fmli1`i'1x.dta", clear
+append using "fmli1`i'2.dta"
+append using "fmli1`i'3.dta"
+append using "fmli1`i'4.dta"
+
+gen q1 = 0
+replace q1 = 1 if qintrvmo=="01" | qintrvmo=="02" | qintrvmo=="03" 
+
+gen q2 = 0
+replace q2 = 1 if qintrvmo=="04" | qintrvmo=="05" | qintrvmo=="06"
+
+gen q3 = 0
+replace q3 = 1 if qintrvmo=="07" | qintrvmo=="08" | qintrvmo=="09"
+
+gen q4 = 0
+replace q4 = 1 if qintrvmo=="10" | qintrvmo=="11" | qintrvmo=="12"
+
+gen date = "201`i'Q1" if q1==1
+replace date = "201`i'Q2" if q2==1
+replace date = "201`i'Q3" if q3==1
+replace date = "201`i'Q4" if q4==1
+
+gen tote = entertpq
+
+capture confirm variable fincatax
+if !_rc {
+					   gen inc = fincatax
+
+               }
+               else {
+					   gen inc = fsalaryx
+               }
+
+drop if inc<=0
+xtile inccat = inc, nq(5) 
+
+keep date finlwt21 inccat tote
+save "201`i'_timeseries.dta", replace
+}
+
+
+
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+forvalues i = 0(1)9 {
+local j = `i' + 1
+
+use "fmli0`i'1x.dta", clear
+append using "fmli0`i'2.dta"
+append using "fmli0`i'3.dta"
+append using "fmli0`i'4.dta"
+
+gen q1 = 0
+replace q1 = 1 if qintrvmo=="01" | qintrvmo=="02" | qintrvmo=="03" 
+
+gen q2 = 0
+replace q2 = 1 if qintrvmo=="04" | qintrvmo=="05" | qintrvmo=="06"
+
+gen q3 = 0
+replace q3 = 1 if qintrvmo=="07" | qintrvmo=="08" | qintrvmo=="09"
+
+gen q4 = 0
+replace q4 = 1 if qintrvmo=="10" | qintrvmo=="11" | qintrvmo=="12"
+
+gen date = "200`i'Q1" if q1==1
+replace date = "200`i'Q2" if q2==1
+replace date = "200`i'Q3" if q3==1
+replace date = "200`i'Q4" if q4==1
+
+gen tote = entertpq
+
+capture confirm variable fincatax
+if !_rc {
+					   gen inc = fincatax
+
+               }
+               else {
+					   gen inc = fincatxm
+               }
+drop if inc<=0
+xtile inccat = inc, nq(5) 
+keep date finlwt21 inccat tote
+save "200`i'_timeseries.dta", replace
+}
+
+
+
+
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+forvalues i = 6(1)9 {
+local j = `i' + 1
+
+use "fmli9`i'1x.dta", clear
+append using "fmli9`i'2.dta"
+append using "fmli9`i'3.dta"
+append using "fmli9`i'4.dta"
+
+gen q1 = 0
+replace q1 = 1 if qintrvmo=="01" | qintrvmo=="02" | qintrvmo=="03" 
+
+gen q2 = 0
+replace q2 = 1 if qintrvmo=="04" | qintrvmo=="05" | qintrvmo=="06"
+
+gen q3 = 0
+replace q3 = 1 if qintrvmo=="07" | qintrvmo=="08" | qintrvmo=="09"
+
+gen q4 = 0
+replace q4 = 1 if qintrvmo=="10" | qintrvmo=="11" | qintrvmo=="12"
+
+gen date = "199`i'Q1" if q1==1
+replace date = "199`i'Q2" if q2==1
+replace date = "199`i'Q3" if q3==1
+replace date = "199`i'Q4" if q4==1
+
+gen tote = entertpq
+
+capture confirm variable fincatax
+if !_rc {
+					   gen inc = fincatax
+
+               }
+               else {
+					   gen inc = fincatxm
+               }
+drop if inc<=0
+xtile inccat = inc, nq(5) 
+keep date finlwt21 inccat tote
+save "199`i'_timeseries.dta", replace
+}
+
+
+***MERGING ALL****
+
+
+forvalues i = 1996(1)2019 {
+
+use "`i'_timeseries.dta", clear
+
+sort date
+by date: egen totent = mean(tote)   // just average without weights
+
+
+duplicates tag date totent, gen(flag)
+duplicates drop date totent, force
+
+save "`i'_timeseries1.dta", replace
+}
+
+***MERGING LOW***
+forvalues i = 1996(1)2019 {
+
+use "`i'_timeseries.dta", clear
+keep if inccat==1
+sort date
+by date: egen totent = mean(tote)   // just average without weights
+
+
+duplicates tag date totent, gen(flag)
+duplicates drop date totent, force
+
+save "`i'_timeseries1_low.dta", replace
+}
+
+***MERGING HIGH***
+forvalues i = 1996(1)2019 {
+
+use "`i'_timeseries.dta", clear
+keep if inccat==5
+sort date
+by date: egen totent = mean(tote)   // just average without weights
+
+duplicates tag date totent, gen(flag)
+duplicates drop date totent, force
+
+save "`i'_timeseries1_high.dta", replace
+}
+
+****EXCEL EXPORT ALL****
+*use "1995_timeseries1.dta", clear
+use "1996_timeseries1.dta", clear
+append using "1997_timeseries1.dta"
+append using "1998_timeseries1.dta"
+append using "1999_timeseries1.dta"
+append using "2000_timeseries1.dta"
+append using "2001_timeseries1.dta"
+append using "2002_timeseries1.dta"
+append using "2003_timeseries1.dta"
+append using "2004_timeseries1.dta"
+append using "2005_timeseries1.dta"
+append using "2006_timeseries1.dta"
+append using "2007_timeseries1.dta"
+append using "2008_timeseries1.dta"
+append using "2009_timeseries1.dta"
+append using "2010_timeseries1.dta"
+append using "2011_timeseries1.dta"
+append using "2012_timeseries1.dta"
+append using "2013_timeseries1.dta"
+append using "2014_timeseries1.dta"
+append using "2015_timeseries1.dta"
+append using "2016_timeseries1.dta"
+append using "2017_timeseries1.dta"
+append using "2018_timeseries1.dta"
+append using "2019_timeseries1.dta"
+
+drop if date==""
+sort date
+save "entertainment spending_timeseries.dta", replace
+
+outsheet date totent using ent_spend_1.csv , comma nolabel 
+
+****EXCEL EXPORT LOW****
+*use "1995_timeseries1.dta", clear
+use "1996_timeseries1_low.dta", clear
+append using "1997_timeseries1_low.dta"
+append using "1998_timeseries1_low.dta"
+append using "1999_timeseries1_low.dta"
+append using "2000_timeseries1_low.dta"
+append using "2001_timeseries1_low.dta"
+append using "2002_timeseries1_low.dta"
+append using "2003_timeseries1_low.dta"
+append using "2004_timeseries1_low.dta"
+append using "2005_timeseries1_low.dta"
+append using "2006_timeseries1_low.dta"
+append using "2007_timeseries1_low.dta"
+append using "2008_timeseries1_low.dta"
+append using "2009_timeseries1_low.dta"
+append using "2010_timeseries1_low.dta"
+append using "2011_timeseries1_low.dta"
+append using "2012_timeseries1_low.dta"
+append using "2013_timeseries1_low.dta"
+append using "2014_timeseries1_low.dta"
+append using "2015_timeseries1_low.dta"
+append using "2016_timeseries1_low.dta"
+append using "2017_timeseries1_low.dta"
+append using "2018_timeseries1_low.dta"
+append using "2019_timeseries1_low.dta"
+
+drop if date==""
+sort date
+save "entertainment spending_timeseries_low.dta", replace
+
+outsheet date totent using ent_spend_low_1.csv , comma nolabel 
+
+
+****EXCEL EXPORT HIGH****
+*use "1995_timeseries1.dta", clear
+use "1996_timeseries1_high.dta", clear
+append using "1997_timeseries1_high.dta"
+append using "1998_timeseries1_high.dta"
+append using "1999_timeseries1_high.dta"
+append using "2000_timeseries1_high.dta"
+append using "2001_timeseries1_high.dta"
+append using "2002_timeseries1_high.dta"
+append using "2003_timeseries1_high.dta"
+append using "2004_timeseries1_high.dta"
+append using "2005_timeseries1_high.dta"
+append using "2006_timeseries1_high.dta"
+append using "2007_timeseries1_high.dta"
+append using "2008_timeseries1_high.dta"
+append using "2009_timeseries1_high.dta"
+append using "2010_timeseries1_high.dta"
+append using "2011_timeseries1_high.dta"
+append using "2012_timeseries1_high.dta"
+append using "2013_timeseries1_high.dta"
+append using "2014_timeseries1_high.dta"
+append using "2015_timeseries1_high.dta"
+append using "2016_timeseries1_high.dta"
+append using "2017_timeseries1_high.dta"
+append using "2018_timeseries1_high.dta"
+append using "2019_timeseries1_high.dta"
+drop tote
+drop if date==""
+sort date
+save "entertainment spending_timeseries_high.dta", replace
+
+outsheet date totent using ent_spend_high_1.csv , comma nolabel 
+
+clear
+use "entertainment spending_timeseries.dta"
+append using "entertainment spending_timeseries_low.dta"
+append using "entertainment spending_timeseries_high.dta"
