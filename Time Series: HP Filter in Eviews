@@ -1,0 +1,35 @@
+Generating the HP filter figures in EViews from the Time Series dataset.
+
+Step1 Data preparation
+First, manually merging the 3 excel sheets created by Stata, and loading the merged sheet into EViews
+
+Step 2 Applying the HP Filter
+HP Filter applied via GUI:
+Method: Use Proc > HP Filter in the series window
+Lambda: 1600 (appropriate for quarterly data)
+
+All income groups
+- Series: totent
+- Lambda: 1600
+- Output: tote_all
+
+Low income group
+- Series: totent_low
+- Lambda: 1600
+- Output: tote_low
+
+High income group
+- Series: totent_high
+- Lambda: 1600
+- Output: tote_high
+
+Store output as: Trend components (tote_all, tote_low, tote_high)
+
+Step 3 Visualization
+Afterwards, grouping the 3 outputs and producing a simple line graph for them:
+Create group with code:
+group group1 tote_all tote_low tote_high
+Open the group → click View > Graph > Line to generate the comparison plot.
+
+Export the graph via:
+click Object > View Options > Copy to Clipboard 
