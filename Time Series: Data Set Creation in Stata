@@ -1,6 +1,6 @@
 Code for creating Time Series data set in Stata
 Source of data: Bureau of Labor Statistics Consumer Expenditure Survey PUMD Dataset FMLI files. Accessible at: https://www.bls.gov/cex/pumd_data.htm#stata
-
+Stata Version: Stata/MP 18.0 for Mac (Apple Silicon)
 
 
 clear
@@ -32,6 +32,8 @@ replace date = "201`i'Q3" if q3==1
 replace date = "201`i'Q4" if q4==1
 
 gen tote = entertpq
+gen totfa = feeadmpq
+gen tottr = tvrdiopq
 
 capture confirm variable fincatax
 if !_rc {
@@ -45,7 +47,7 @@ if !_rc {
 drop if inc<=0
 xtile inccat = inc, nq(5) 
 
-keep date finlwt21 inccat tote
+keep date finlwt21 inccat tote totfa tottr
 save "201`i'_timeseries.dta", replace
 }
 
@@ -81,6 +83,8 @@ replace date = "200`i'Q3" if q3==1
 replace date = "200`i'Q4" if q4==1
 
 gen tote = entertpq
+gen totfa = feeadmpq
+gen tottr = tvrdiopq
 
 capture confirm variable fincatax
 if !_rc {
@@ -92,7 +96,7 @@ if !_rc {
                }
 drop if inc<=0
 xtile inccat = inc, nq(5) 
-keep date finlwt21 inccat tote
+keep date finlwt21 inccat tote totfa tottr
 save "200`i'_timeseries.dta", replace
 }
 
@@ -128,6 +132,8 @@ replace date = "199`i'Q3" if q3==1
 replace date = "199`i'Q4" if q4==1
 
 gen tote = entertpq
+gen totfa = feeadmpq
+gen tottr = tvrdiopq
 
 capture confirm variable fincatax
 if !_rc {
@@ -139,7 +145,7 @@ if !_rc {
                }
 drop if inc<=0
 xtile inccat = inc, nq(5) 
-keep date finlwt21 inccat tote
+keep date finlwt21 inccat tote totfa tottr
 save "199`i'_timeseries.dta", replace
 }
 
@@ -153,6 +159,8 @@ use "`i'_timeseries.dta", clear
 
 sort date
 by date: egen totent = mean(tote)   // just average without weights
+by date: egen tot_fa = mean(totfa)   // just average without weights
+by date: egen tot_tr = mean(tottr)   // just average without weights
 
 
 duplicates tag date totent, gen(flag)
@@ -168,6 +176,8 @@ use "`i'_timeseries.dta", clear
 keep if inccat==1
 sort date
 by date: egen totent = mean(tote)   // just average without weights
+by date: egen tot_fa = mean(totfa)   // just average without weights
+by date: egen tot_tr = mean(tottr)   // just average without weights
 
 
 duplicates tag date totent, gen(flag)
@@ -183,6 +193,8 @@ use "`i'_timeseries.dta", clear
 keep if inccat==5
 sort date
 by date: egen totent = mean(tote)   // just average without weights
+by date: egen tot_fa = mean(totfa)   // just average without weights
+by date: egen tot_tr = mean(tottr)   // just average without weights
 
 duplicates tag date totent, gen(flag)
 duplicates drop date totent, force
@@ -219,9 +231,11 @@ append using "2019_timeseries1.dta"
 
 drop if date==""
 sort date
-save "entertainment spending_timeseries.dta", replace
+gen year = substr(date,1,4)
+gen qdate = quarterly(date, "YQ")
+format qdate %tq
 
-outsheet date totent using ent_spend_1.csv , comma nolabel 
+save "entertainment spending_timeseries.dta", replace
 
 ****EXCEL EXPORT LOW****
 *use "1995_timeseries1.dta", clear
@@ -252,9 +266,14 @@ append using "2019_timeseries1_low.dta"
 
 drop if date==""
 sort date
-save "entertainment spending_timeseries_low.dta", replace
+gen year = substr(date,1,4)
+gen qdate = quarterly(date, "YQ")
+format qdate %tq
+rename totent totent_low
+rename tot_fa tot_fa_low
+rename tot_tr tot_tr_low
 
-outsheet date totent using ent_spend_low_1.csv , comma nolabel 
+save "entertainment spending_timeseries_low.dta", replace
 
 
 ****EXCEL EXPORT HIGH****
@@ -286,11 +305,28 @@ append using "2019_timeseries1_high.dta"
 drop tote
 drop if date==""
 sort date
+gen year = substr(date,1,4)
+gen qdate = quarterly(date, "YQ")
+format qdate %tq
+rename totent totent_high
+rename tot_fa tot_fa_high
+rename tot_tr tot_tr_high
+
 save "entertainment spending_timeseries_high.dta", replace
 
-outsheet date totent using ent_spend_high_1.csv , comma nolabel 
 
 clear
 use "entertainment spending_timeseries.dta"
 append using "entertainment spending_timeseries_low.dta"
 append using "entertainment spending_timeseries_high.dta"
+
+
+use "entertainment spending_timeseries.dta", clear
+merge 1:1 qdate using "entertainment spending_timeseries_low.dta"
+drop _merge
+
+merge 1:1 qdate using "entertainment spending_timeseries_high.dta"
+drop _merge
+outsheet qdate totent totent_low totent_high tot_fa tot_fa_low tot_fa_high tot_tr tot_tr_low tot_tr_high using ent_spend_timeseries.csv , comma nolabel 
+
+
