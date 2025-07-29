@@ -1,35 +1,76 @@
 Generating the HP filter figures in EViews from the Time Series dataset.
+Software used: EViews 12 Student Version Lite for Mac (Student Edition - Feb 25 2025 Build)
 
-Step1 Data preparation
-First, manually merging the 3 excel sheets created by Stata, and loading the merged sheet into EViews
+Step1 Data import
+First, importing the .csv file into EViews named "ent_spend_timeseries.csv". 
 
 Step 2 Applying the HP Filter
 HP Filter applied via GUI:
-Method: Use Proc > HP Filter in the series window
+Method: Use Quick > Series Statistics > Hodrick-Prescott Filter
 Lambda: 1600 (appropriate for quarterly data)
 
+1. Total Entertainment Spending
 All income groups
 - Series: totent
 - Lambda: 1600
-- Output: tote_all
+- Output/Smoothed series: tote_all
 
 Low income group
 - Series: totent_low
 - Lambda: 1600
-- Output: tote_low
+- Output/Smoothed series: tote_low
 
 High income group
 - Series: totent_high
 - Lambda: 1600
-- Output: tote_high
+- Output/Smoothed series: tote_high
 
 Store output as: Trend components (tote_all, tote_low, tote_high)
 
+2. Total Spending on Fees & Admissions
+All income groups
+- Series: tot_fa
+- Lambda: 1600
+- Output/Smoothed series: totfa_all
+
+Low income group
+- Series: tot_fa_low
+- Lambda: 1600
+- Output/Smoothed series: totfa_low
+
+High income group
+- Series: tot_fa_high
+- Lambda: 1600
+- Output/Smoothed series: totfa_high
+
+Store output as: Trend components (totfa_all, totfa_low, totfa_high)
+
+3. Total Spending on TVs, Radio & Sound Equipment
+All income groups
+- Series: tot_tr
+- Lambda: 1600
+- Output/Smoothed series: tottr_all
+
+Low income group
+- Series: tot_tr_low
+- Lambda: 1600
+- Output/Smoothed series: tottr_low
+
+High income group
+- Series: tot_tr_high
+- Lambda: 1600
+- Output/Smoothed series: tottr_high
+
+Store output as: Trend components (tottr_all, tottr_low, tottr_high)
+
 Step 3 Visualization
-Afterwards, grouping the 3 outputs and producing a simple line graph for them:
+Afterwards, grouping the 3 outputs per spending category and producing a simple line graph for each of them:
 Create group with code:
-group group1 tote_all tote_low tote_high
-Open the group → click View > Graph > Line to generate the comparison plot.
+group group_totfa totfa_all totfa_low totfa_high
+group group_tottr tottr_all tottr_low tottr_high
+group group_tote tote_all tote_low tote_high
+
+Open the each group separately → click View > Graph > Line to generate the comparison plot.
 
 Export the graph via:
 click Object > View Options > Copy to Clipboard 
