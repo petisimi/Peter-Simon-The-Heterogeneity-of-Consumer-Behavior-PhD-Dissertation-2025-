@@ -1,0 +1,376 @@
+
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+forvalues i = 0(1)9 {
+
+
+use "fmli0`i'1x.dta", clear
+append using "fmli0`i'2.dta"
+append using "fmli0`i'3.dta"
+append using "fmli0`i'4.dta"
+
+gen child = 0
+replace child = 1 if fam_type=="2" | fam_type=="3" | fam_type=="4" | fam_type=="6" | fam_type=="7"
+
+gen married = 0
+replace married = 1 if marital1=="1"
+
+gen white = 0
+replace white = 1 if ref_race=="1"
+
+gen male = 0
+replace male = 1 if sex_ref=="1"
+
+gen college = 0
+replace college = 1 if educ_ref=="13" | educ_ref=="14" | educ_ref=="15" | educ_ref=="16" | educ_ref=="17"
+
+gen urban = 0
+replace urban = 1 if bls_urbn=="1"
+
+gen q1 = 0
+replace q1 = 1 if qintrvmo=="01" | qintrvmo=="02"| qintrvmo=="03"
+
+gen q2 = 0
+replace q2 = 1 if qintrvmo=="04" | qintrvmo=="05" | qintrvmo=="06"
+
+gen q3 = 0
+replace q3 = 1 if qintrvmo=="07" | qintrvmo=="08" | qintrvmo=="09"
+
+gen q4 = 0
+replace q4 = 1 if qintrvmo=="10" | qintrvmo=="11" | qintrvmo=="12"
+
+
+gen date = "200`i'Q1" if q1==1
+replace date = "200`i'Q2" if q2==1
+replace date = "200`i'Q3" if q3==1
+replace date = "200`i'Q4" if q4==1
+
+replace compsavx = 0 if missing(compsavx) 
+replace compckgx  = 0 if missing(compckgx) 
+replace compowdx = 0 if missing(compowdx) 
+replace compsecx = 0 if missing(compsecx)
+replace compbndx = 0 if missing(compbndx) 
+
+capture confirm variable fincatax
+if !_rc {
+                       gen consump1 = fincatax - compsavx - compckgx - compbndx - compsecx - compowdx
+					   gen inc = fincatax/1000
+					   keep date educ_ref consump1 inc newid hhid fincatax feeadmpq feeadmcq tvrdiopq tvrdiocq entertpq entertcq otheqpcq otheqppq fam_size persot64 perslt18 child married white male college urban age_ref q1 q2 q3 q4 finlwt21 totexppq totexpcq region popsize smsastat state respstat
+
+               }
+               else {
+                       gen consump1 = fincatxm - compsavx - compckgx - compbndx - compsecx - compowdx
+					   gen inc = fincatxm/1000
+					   keep date educ_ref consump1 inc newid hhid fincatxm feeadmpq feeadmcq tvrdiopq tvrdiocq entertpq entertcq otheqpcq otheqppq fam_size persot64 perslt18 child married white male college urban age_ref q1 q2 q3 q4 finlwt21 totexppq totexpcq region popsize smsastat state respstat
+               }
+
+
+gen feeadmpq1 = feeadmpq*finlwt21/4
+gen tvrdiopq1 = tvrdiopq*finlwt21/4
+gen entertpq1 = entertpq*finlwt21/4
+gen otheqppq1 = otheqppq*finlwt21/4
+gen totexppq1 = totexppq*finlwt21/4
+
+replace inc = inc*finlwt21/4
+
+
+gen totfa = feeadmpq1/1000
+gen toto = otheqppq1/1000
+gen tottr = tvrdiopq1/1000
+gen tote = entertpq1/1000
+gen totexp = totexppq1/1000
+
+gen entertshare = (tote/totexp)*10
+gen consump = consump1/1000
+replace consump = consump*finlwt21/4
+
+gen recession = 0
+
+
+
+save "200`i'_data.dta", replace
+}
+
+
+****************************
+*2010-14 !! NO AFTER TAX DATA FROM 2015 ON !! --> fsalaryx is used! somewhat different!
+
+
+forvalues i = 0(1)9 {
+
+use "fmli1`i'1x.dta", clear
+append using "fmli1`i'2.dta"
+append using "fmli1`i'3.dta"
+append using "fmli1`i'4.dta"
+
+gen child = 0
+replace child = 1 if fam_type=="2" | fam_type=="3" | fam_type=="4" | fam_type=="6" | fam_type=="7"
+
+gen married = 0
+replace married = 1 if marital1=="1"
+
+gen white = 0
+replace white = 1 if ref_race=="1"
+
+gen male = 0
+replace male = 1 if sex_ref=="1"
+
+gen college = 0
+replace college = 1 if educ_ref=="13" | educ_ref=="14" | educ_ref=="15" | educ_ref=="16" | educ_ref=="17"
+
+gen urban = 0
+replace urban = 1 if bls_urbn=="1"
+
+gen q1 = 0
+replace q1 = 1 if qintrvmo=="01" | qintrvmo=="02" | qintrvmo=="03"
+
+gen q2 = 0
+replace q2 = 1 if qintrvmo=="04" | qintrvmo=="05" | qintrvmo=="06"
+
+gen q3 = 0
+replace q3 = 1 if qintrvmo=="07" | qintrvmo=="08" | qintrvmo=="09"
+
+gen q4 = 0
+replace q4 = 1 if qintrvmo=="10" | qintrvmo=="11" | qintrvmo=="12"
+
+gen date = "201`i'Q1" if q1==1
+replace date = "201`i'Q2" if q2==1
+replace date = "201`i'Q3" if q3==1
+replace date = "201`i'Q4" if q4==1
+
+capture confirm variable fincatax
+if !_rc {
+					   gen inc = fincatax/1000
+					   keep date educ_ref inc newid hhid fincatax feeadmpq feeadmcq tvrdiopq tvrdiocq entertpq entertcq otheqpcq otheqppq fam_size persot64 perslt18 child married white male college urban age_ref q1 q2 q3 q4 finlwt21 totexppq totexpcq region popsize smsastat state
+
+               }
+               else {
+					   gen inc = fsalaryx/1000
+					   keep date educ_ref inc newid hhid fsalaryx feeadmpq feeadmcq tvrdiopq tvrdiocq entertpq entertcq otheqpcq otheqppq fam_size persot64 perslt18 child married white male college urban age_ref q1 q2 q3 q4 finlwt21 totexppq totexpcq region popsize smsastat state
+               }
+
+
+replace feeadmpq = feeadmpq*finlwt21/4
+replace feeadmcq = feeadmcq*finlwt21/4
+replace tvrdiopq = tvrdiopq*finlwt21/4
+replace tvrdiocq = tvrdiocq*finlwt21/4
+replace entertpq = entertpq*finlwt21/4
+replace entertcq = entertcq*finlwt21/4
+replace totexppq = totexppq*finlwt21/4
+replace totexpcq = totexpcq*finlwt21/4
+replace inc = inc*finlwt21/4
+
+gen totfa = feeadmpq/1000
+gen toto = otheqppq/1000
+gen tottr = tvrdiopq/1000
+gen tote = entertpq/1000
+gen totexp = totexppq/1000
+
+gen entertshare = (tote/totexp)*10
+
+gen recession = 0
+
+
+
+save "201`i'_data.dta", replace
+}
+
+
+
+
+*****1996-2000
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+forvalues i = 6(1)9 {
+
+
+use "fmli9`i'1x.dta", clear
+append using "fmli9`i'2.dta"
+append using "fmli9`i'3.dta"
+append using "fmli9`i'4.dta"
+
+gen child = 0
+replace child = 1 if fam_type=="2" | fam_type=="3" | fam_type=="4" | fam_type=="6" | fam_type=="7"
+
+gen married = 0
+replace married = 1 if marital1=="1"
+
+gen white = 0
+replace white = 1 if ref_race=="1"
+
+gen male = 0
+replace male = 1 if sex_ref=="1"
+
+gen college = 0
+replace college = 1 if educ_ref=="13" | educ_ref=="14" | educ_ref=="15" | educ_ref=="16" | educ_ref=="17"
+
+gen urban = 0
+replace urban = 1 if bls_urbn=="1"
+
+gen q1 = 0
+replace q1 = 1 if qintrvmo=="01" | qintrvmo=="02"| qintrvmo=="03"
+
+gen q2 = 0
+replace q2 = 1 if qintrvmo=="04" | qintrvmo=="05" | qintrvmo=="06"
+
+gen q3 = 0
+replace q3 = 1 if qintrvmo=="07" | qintrvmo=="08" | qintrvmo=="09"
+
+gen q4 = 0
+replace q4 = 1 if qintrvmo=="10" | qintrvmo=="11" | qintrvmo=="12"
+
+
+gen date = "199`i'Q1" if q1==1
+replace date = "199`i'Q2" if q2==1
+replace date = "199`i'Q3" if q3==1
+replace date = "199`i'Q4" if q4==1
+
+replace compsavx = 0 if missing(compsavx) 
+replace compckgx  = 0 if missing(compckgx) 
+replace compowdx = 0 if missing(compowdx) 
+replace compsecx = 0 if missing(compsecx)
+replace compbndx = 0 if missing(compbndx) 
+
+capture confirm variable fincatax
+if !_rc {
+                       gen consump1 = fincatax - compsavx - compckgx - compbndx - compsecx - compowdx
+					   gen inc = fincatax/1000
+					   keep date educ_ref consump1 inc newid hhid fincatax feeadmpq feeadmcq tvrdiopq tvrdiocq entertpq entertcq otheqpcq otheqppq fam_size persot64 perslt18 child married white male college urban age_ref q1 q2 q3 q4 finlwt21 totexppq totexpcq
+
+               }
+               else {
+                       gen consump1 = fincatxm - compsavx - compckgx - compbndx - compsecx - compowdx
+					   gen inc = fincatxm/1000
+					   keep date educ_ref consump1 inc newid hhid fincatxm feeadmpq feeadmcq tvrdiopq tvrdiocq entertpq entertcq otheqpcq otheqppq fam_size persot64 perslt18 child married white male college urban age_ref q1 q2 q3 q4 finlwt21 totexppq totexpcq
+               }
+
+
+replace feeadmpq = feeadmpq*finlwt21/4
+replace feeadmcq = feeadmcq*finlwt21/4
+replace tvrdiopq = tvrdiopq*finlwt21/4
+replace tvrdiocq = tvrdiocq*finlwt21/4
+replace entertpq = entertpq*finlwt21/4
+replace entertcq = entertcq*finlwt21/4
+replace totexppq = totexppq*finlwt21/4
+replace totexpcq = totexpcq*finlwt21/4
+replace inc = inc*finlwt21/4
+
+
+gen totfa = feeadmpq/1000
+gen toto = otheqppq/1000
+gen tottr = tvrdiopq/1000
+gen tote = entertpq/1000
+gen totexp = totexppq/1000
+
+gen entertshare = (tote/totexp)*10
+gen consump = consump1/1000
+replace consump = consump*finlwt21/4
+
+gen recession = 0
+
+
+
+save "199`i'_data.dta", replace
+}
+
+
+*Generate descriptive statistics for Table 1
+*Year 2000
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+use "2000_data.dta", clear
+count if respstat == "2" & fincatax<=0
+count if fincatax<=0
+drop if fincatax<=0
+keep if respstat == "1"
+xtile inccat1 = fincatax, nq(5)
+
+tabstat fincatax [aw=finlwt21], by(inccat1) stat(mean)
+*annualize quarterly entertainment expenditures
+gen totent = entertpq*4
+tabstat totent [aw=finlwt21], by(inccat1) stat(mean)
+
+*Year 2003
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+use "2003_data.dta", clear
+count if respstat == "2" & fincatax<=0
+count if fincatax<=0
+drop if fincatax<=0
+keep if respstat == "1"
+xtile inccat1 = fincatax, nq(5)
+
+tabstat fincatax [aw=finlwt21], by(inccat1) stat(mean)
+*annualize quarterly entertainment expenditures
+gen totent = entertpq*4
+tabstat totent [aw=finlwt21], by(inccat1) stat(mean)
+
+
+*Year 2006
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+use "2006_data.dta", clear
+count if respstat == "2" & fincatax<=0
+count if fincatax<=0
+drop if fincatax<=0
+keep if respstat == "1"
+xtile inccat1 = fincatax, nq(5)
+
+tabstat fincatax [aw=finlwt21], by(inccat1) stat(mean)
+*annualize quarterly entertainment expenditures
+gen totent = entertpq*4
+tabstat totent [aw=finlwt21], by(inccat1) stat(mean)
+
+
+*Year 2009
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+use "2009_data.dta", clear
+count if respstat == "2" & fincatax<=0
+count if fincatax<=0
+drop if fincatax<=0
+keep if respstat == "1"
+xtile inccat1 = fincatax, nq(5)
+
+tabstat fincatax [aw=finlwt21], by(inccat1) stat(mean)
+*annualize quarterly entertainment expenditures
+gen totent = entertpq*4
+tabstat totent [aw=finlwt21], by(inccat1) stat(mean)
+
+
+*Descriptive stats for tables 3 and 4
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+use "2000_data.dta", clear
+append using "2003_data.dta" 
+append using "2006_data.dta" 
+append using "2009_data.dta" 
+merge m:1 date using cpi_bysector
+
+drop if fincatax<=0
+
+gen year = substr(date,1,4)
+drop if year=="2001" | year=="2002" | year=="2004" | year=="2005" | year=="2007" | year=="2008" | year=="2010"
+
+table year, statistic(mean cpi cpi_entavg persot64 age_ref fam_size perslt18 child male married white college) nformat(%9.5f)
+
+collapse (sum) tote totfa tottr totexp, by(year)
+
+gen ratio_ent = tote/totexp
+gen ratio_fa  = totfa/totexp
+gen ratio_tr  = tottr/totexp
+
+table year, statistic(mean ratio_ent ratio_fa ratio_tr) nformat(%9.5f)
+
