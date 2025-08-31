@@ -1,0 +1,98 @@
+*Create cohort data using datasets created in "Section 3: Data Generation & Descriptive Statistics"
+
+clear
+set more off
+cd "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data"
+
+use "2000_data.dta", clear
+append using "2001_data.dta"
+append using "2002_data.dta"
+append using "2003_data.dta"
+append using "2004_data.dta"
+append using "2005_data.dta"
+append using "2006_data.dta"
+append using "2007_data.dta"
+append using "2008_data.dta"
+append using "2009_data.dta"
+append using "2010_data.dta"
+merge m:1 date using cpi_bysector
+
+gen year = substr(date,1,4)
+gen qdate = quarterly(date, "YQ")
+format qdate %tq
+
+destring year, replace
+
+*drop if respstat=="2"
+drop if inc<=0
+
+gen ybirth = year-age_ref
+
+gen quarter1=0
+replace quarter1=1 if q2==1
+gen quarter2=0
+replace quarter2=1 if q3==1
+gen quarter3=0
+replace quarter3=1 if q4==1
+gen quarter4=0
+replace quarter4=1 if q1==1
+
+// Keep only observations that meet the specified criteria
+
+
+keep if ybirth >= 1940 & ybirth <= 1979 & age_ref >= 19 & age_ref <= 75
+
+// Generate a cohort variable based on 5-year intervals
+
+gen cohort = .
+
+// Loop to assign cohort values
+forval i = 1/8 {
+    local start_year = 1940 + (`i' - 1) * 5
+    local end_year = 1944 + (`i' - 1) * 5
+    replace cohort = `i' if ybirth >= `start_year' & ybirth <= `end_year'
+}
+
+replace recession=1 if year==2001 | year==2002 | year==2008 | year==2009 | year==2010
+
+destring pop, replace
+
+collapse (mean) tote totfa tottr inc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4 year, by(cohort qdate)
+
+gen linc = log(inc)
+gen ltotfa = log(totfa)
+gen ltottr = log(tottr)
+gen ltote = log(tote)
+
+gen recinc = linc*recession
+
+*CHECK FOR TIME FIXED EFFECT MULTICOLLINEARITY
+
+reg ltote c.linc##i.recession age_ref fam_size perslt18 child persot64 male married white college i.year, robust
+
+*CHECK IF EACH PSEUDO-PANEL CELL CONTAINS ONLY ONE OBSERVATION
+bysort cohort qdate: gen dup = _N
+tab dup
+
+
+*PSEUDO PANEL REGRESSIONS
+
+tsset cohort qdate
+
+xtreg ltote linc recinc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban quarter2 quarter3 quarter4, fe vce(robust)
+
+outreg2 using regression_table_cohort.doc, replace se ctitle("Total Entertainment") dec(2) sdec(3)
+
+xtreg ltotfa linc recinc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4, fe vce(robust)
+
+outreg2 using regression_table_cohort.doc, append se ctitle("Fees and Admissions") dec(2) sdec(3)
+
+xtreg ltottr linc recinc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4, fe vce(robust)
+
+outreg2 using regression_table_cohort.doc, append se ctitle("TVs, Radio and Sound Eq.") dec(2) sdec(3)
+
+*Twoway plots
+*twoway (line linc age, by(cohort) connect(1))
+*twoway (line ltote age, by(cohort) connect(1))
+*twoway (line ltotfa age, by(cohort) connect(1))
+*twoway (line ltottr age, by(cohort) connect(1))
