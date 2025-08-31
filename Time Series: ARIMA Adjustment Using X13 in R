@@ -1,0 +1,59 @@
+# Install missing packages
+packages <- c("readr", "seasonal", "forecast")
+install_if_missing <- function(p) {
+  if (!requireNamespace(p, quietly = TRUE)) {
+    install.packages(p)
+  }
+}
+invisible(lapply(packages, install_if_missing))
+install.packages("seasonal")
+install.packages("seasonal", type = "source")
+
+
+# Load libraries
+library(readr)
+library(seasonal)
+library(forecast)
+
+# === Step 1: Load your data ===
+file_path <- "/Users/Peti1/Documents/CorvinusPhD/dissertation/entertainment spending/data/ent_spend_timeseries.csv"
+
+data <- read_csv(file_path)
+
+# Adjust: assume columns are Date, total_entertainment, fees_admissions, tv_radio_equipment
+# Set quarterly time series (adjust start year/quarter if needed!)
+series_list <- list(
+  Total_entertainment = ts(data$totent, start = c(1996,1), frequency = 4),
+  Fees_and_Admissions = ts(data$tot_fa, start = c(1996,1), frequency = 4),
+  TVs_Radios_and_Sound_Equipment = ts(data$tot_tr, start = c(1996,1), frequency = 4)
+)
+
+# === Step 2: Run X-13ARIMA-SEATS automatically for each series ===
+results <- list()
+pdf("X13_SARIMA_results.pdf", width = 8, height = 10) 
+
+for (name in names(series_list)) {
+  y <- series_list[[name]]
+  
+  # Seasonal adjustment with auto model selection
+  sa <- seas(y)
+  cat("\n==== Summary for", name, "====\n")
+  print(summary(sa))
+  
+  # Get selected ARIMA model
+  model_spec <- summary(sa)$arima.model
+  
+  # Save plots
+  par(mfrow=c(3,1))
+  plot(y, main=paste("Original series:", name), ylab="Spending", col="darkblue")
+  plot(sa, main=paste("X-13 Adjusted:", name))
+
+  # Store results
+  results[[name]] <- list(
+    x13_summary = summary(sa),
+    arima_selected = model_spec,
+    adjusted_series = adj_series
+  )
+}
+
+dev.off()
