@@ -1,8 +1,9 @@
 Generating the HP filter figures in EViews from the Time Series dataset.
 Software used: EViews 12 Student Version Lite for Mac (Student Edition - Feb 25 2025 Build)
+Step 0 CPI adjustment in the excel file generated from "Section 3.3.3.: Time Series: Data Set Creation Stata" named "ent_spend_timeseries.csv", then saving it as "ent_spend_timeseries_cpi_adjusted.csv" based on CPI data from https://fred.stlouisfed.org/series/CPALCY01USQ661N#
 
 Step1 Data import
-First, importing the .csv file into EViews named "ent_spend_timeseries.csv". 
+First, importing the .csv file into EViews named "ent_spend_timeseries_cpi_adjusted.csv". 
 
 Step 2 Applying the HP Filter
 HP Filter applied via GUI:
