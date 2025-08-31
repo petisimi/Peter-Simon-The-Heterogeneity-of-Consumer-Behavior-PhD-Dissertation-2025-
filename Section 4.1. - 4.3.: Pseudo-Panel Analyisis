@@ -66,10 +66,6 @@ gen ltote = log(tote)
 
 gen recinc = linc*recession
 
-*CHECK FOR TIME FIXED EFFECT MULTICOLLINEARITY
-
-reg ltote c.linc##i.recession age_ref fam_size perslt18 child persot64 male married white college i.year, robust
-
 *CHECK IF EACH PSEUDO-PANEL CELL CONTAINS ONLY ONE OBSERVATION
 bysort cohort qdate: gen dup = _N
 tab dup
