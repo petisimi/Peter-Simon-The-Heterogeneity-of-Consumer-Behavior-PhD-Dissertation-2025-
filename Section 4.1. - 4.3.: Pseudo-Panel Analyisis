@@ -1,4 +1,4 @@
-*Create cohort data using datasets created in "Section 3: Data Generation & Descriptive Statistics"
+*Create cohort data
 
 clear
 set more off
@@ -25,6 +25,11 @@ destring year, replace
 
 *drop if respstat=="2"
 drop if inc<=0
+
+replace inc = inc * (100/cpi)
+replace tote = tote * (100/cpi)
+replace totfa = totfa * (100/cpi)
+replace tottr = tottr * (100/cpi)
 
 gen ybirth = year-age_ref
 
@@ -57,7 +62,7 @@ replace recession=1 if year==2001 | year==2002 | year==2008 | year==2009 | year=
 
 destring pop, replace
 
-collapse (mean) tote totfa tottr inc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4 year, by(cohort qdate)
+collapse (mean) tote totfa tottr inc recession pop age_ref fam_size perslt18 child persot64 male married white college urban quarter2 quarter3 quarter4 year, by(cohort qdate)
 
 gen linc = log(inc)
 gen ltotfa = log(totfa)
@@ -75,20 +80,15 @@ tab dup
 
 tsset cohort qdate
 
-xtreg ltote linc recinc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban quarter2 quarter3 quarter4, fe vce(robust)
+xtreg ltote linc recinc recession pop age_ref fam_size perslt18 child persot64 male married white college urban quarter2 quarter3 quarter4, fe vce(robust)
 
 outreg2 using regression_table_cohort.doc, replace se ctitle("Total Entertainment") dec(2) sdec(3)
 
-xtreg ltotfa linc recinc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4, fe vce(robust)
+xtreg ltotfa linc recinc recession pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4, fe vce(robust)
 
 outreg2 using regression_table_cohort.doc, append se ctitle("Fees and Admissions") dec(2) sdec(3)
 
-xtreg ltottr linc recinc recession cpi cpi_entavg pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4, fe vce(robust)
+xtreg ltottr linc recinc recession pop age_ref fam_size perslt18 child persot64 male married white college urban  quarter2 quarter3 quarter4, fe vce(robust)
 
 outreg2 using regression_table_cohort.doc, append se ctitle("TVs, Radio and Sound Eq.") dec(2) sdec(3)
 
-*Twoway plots
-*twoway (line linc age, by(cohort) connect(1))
-*twoway (line ltote age, by(cohort) connect(1))
-*twoway (line ltotfa age, by(cohort) connect(1))
-*twoway (line ltottr age, by(cohort) connect(1))
