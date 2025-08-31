@@ -51,20 +51,19 @@ ttest tottr, by(inc_pos)
 drop if inc<=0
 
 
-sum totexp
+replace inc = inc * (100/cpi)
+replace tote = tote * (100/cpi)
+replace totfa = totfa * (100/cpi)
+replace tottr = tottr * (100/cpi)
 
-gen lcons = log(consump)
+
 gen linc = log(inc)
 gen ltotfa = log(totfa)
 gen ltottr = log(tottr)
-gen ltoto = log(toto)
 gen ltote = log(tote)
-gen ltotexp = log(totexp)
 
 gen prfa = 0
 replace prfa = 1 if totfa>0
-gen prot = 0
-replace prot = 1 if toto>0
 gen prtr = 0
 replace prtr = 1 if tottr>0
 gen pren = 0
@@ -120,43 +119,43 @@ outreg2 using regression_table_OLS_tote_prerecession.doc, append se ctitle("High
 
 *PROBIT
 
-probit pren linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3, robust
+probit pren linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3, robust
 outreg2 using regression_table_probit_tote_prerecession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-probit pren linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==1, robust
+probit pren linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==1, robust
 outreg2 using regression_table_probit_tote_prerecession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-probit pren linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==5, robust
+probit pren linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==5, robust
 outreg2 using regression_table_probit_tote_prerecession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3)
 
 
 
 *TVs
 
-probit prtr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3, robust
+probit prtr linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3, robust
 
 outreg2 using regression_table_probit_tottr_prerecession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-probit prtr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==1, robust
+probit prtr linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==1, robust
 
 outreg2 using regression_table_probit_tottr_prerecession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-probit prtr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==5, robust
+probit prtr linc age_ref fam_size perslt18 child persot64 male married white college  q1 q2 q3 if inccat==5, robust
 
 outreg2 using regression_table_probit_tottr_prerecession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3)
 
 
 *Fees
 
-probit prfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3, robust
+probit prfa linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3, robust
 
 outreg2 using regression_table_probit_totfa_prerecession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-probit prfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==1, robust
+probit prfa linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==1, robust
 
 outreg2 using regression_table_probit_totfa_prerecession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-probit prfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==5, robust
+probit prfa linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==5, robust
 
 outreg2 using regression_table_probit_totfa_prerecession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3)
 
@@ -174,15 +173,15 @@ egen panelid = group(id entry_qdate)
 * Set the panel structure
 xtset panelid qdate
 
-xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate, fe vce(robust)
+xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college i.qdate, fe vce(robust)
 
 outreg2 using regression_table_fe_tote_prerecession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==1, fe vce(robust)
+xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==1, fe vce(robust)
 
 outreg2 using regression_table_fe_tote_prerecession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==5, fe vce(robust)
+xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==5, fe vce(robust)
 
 outreg2 using regression_table_fe_tote_prerecession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3) drop(i.qdate)
 
@@ -190,15 +189,15 @@ outreg2 using regression_table_fe_tote_prerecession.doc, append se ctitle("Highe
 
 xtset panelid qdate
 
-xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate, fe vce(robust)
+xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college i.qdate, fe vce(robust)
 
 outreg2 using regression_table_fe_totfa_prerecession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==1, fe vce(robust)
+xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==1, fe vce(robust)
 
 outreg2 using regression_table_fe_totfa_prerecession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==5, fe vce(robust)
+xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==5, fe vce(robust)
 
 outreg2 using regression_table_fe_totfa_prerecession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3) drop(i.qdate)
 
@@ -207,15 +206,15 @@ outreg2 using regression_table_fe_totfa_prerecession.doc, append se ctitle("High
 
 xtset panelid qdate
 
-xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate, fe vce(robust)
+xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college i.qdate, fe vce(robust)
 
 outreg2 using regression_table_fe_tottr_prerecession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==1, fe vce(robust)
+xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==1, fe vce(robust)
 
 outreg2 using regression_table_fe_tottr_prerecession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==5, fe vce(robust)
+xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==5, fe vce(robust)
 
 outreg2 using regression_table_fe_tottr_prerecession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3) drop(i.qdate)
 
@@ -270,20 +269,19 @@ ttest tottr, by(inc_pos)
 
 drop if inc<=0
 
-sum totexp
+replace inc = inc * (100/cpi)
+replace tote = tote * (100/cpi)
+replace totfa = totfa * (100/cpi)
+replace tottr = tottr * (100/cpi)
 
-gen lcons = log(consump)
+
 gen linc = log(inc)
 gen ltotfa = log(totfa)
 gen ltottr = log(tottr)
-gen ltoto = log(toto)
 gen ltote = log(tote)
-gen ltotexp = log(totexp)
 
 gen prfa = 0
 replace prfa = 1 if totfa>0
-gen prot = 0
-replace prot = 1 if toto>0
 gen prtr = 0
 replace prtr = 1 if tottr>0
 gen pren = 0
@@ -337,43 +335,43 @@ outreg2 using regression_table_OLS_tote_recession.doc, append se ctitle("Highest
 
 *PROBIT
 
-probit pren linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3, robust
+probit pren linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3, robust
 outreg2 using regression_table_probit_tote_recession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-probit pren linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==1, robust
+probit pren linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==1, robust
 outreg2 using regression_table_probit_tote_recession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-probit pren linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==5, robust
+probit pren linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==5, robust
 outreg2 using regression_table_probit_tote_recession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3)
 
 
 
 *TVs
 
-probit prtr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3, robust
+probit prtr linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3, robust
 
 outreg2 using regression_table_probit_tottr_recession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-probit prtr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==1, robust
+probit prtr linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==1, robust
 
 outreg2 using regression_table_probit_tottr_recession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-probit prtr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==5, robust
+probit prtr linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==5, robust
 
 outreg2 using regression_table_probit_tottr_recession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3)
 
 
 *Fees
 
-probit prfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3, robust
+probit prfa linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3, robust
 
 outreg2 using regression_table_probit_totfa_recession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-probit prfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==1, robust
+probit prfa linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==1, robust
 
 outreg2 using regression_table_probit_totfa_recession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-probit prfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg q1 q2 q3 if inccat==5, robust
+probit prfa linc age_ref fam_size perslt18 child persot64 male married white college q1 q2 q3 if inccat==5, robust
 
 outreg2 using regression_table_probit_totfa_recession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3)
 
@@ -391,15 +389,15 @@ egen panelid = group(id entry_qdate)
 * Set the panel structure
 xtset panelid qdate
 
-xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate, fe vce(robust)
+xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college i.qdate, fe vce(robust)
 
 outreg2 using regression_table_fe_tote_recession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==1, fe vce(robust)
+xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==1, fe vce(robust)
 
 outreg2 using regression_table_fe_tote_recession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==5, fe vce(robust)
+xtreg ltote linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==5, fe vce(robust)
 
 outreg2 using regression_table_fe_tote_recession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3) drop(i.qdate)
 
@@ -407,15 +405,15 @@ outreg2 using regression_table_fe_tote_recession.doc, append se ctitle("Highest 
 
 xtset panelid qdate
 
-xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate, fe vce(robust)
+xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college i.qdate, fe vce(robust)
 
 outreg2 using regression_table_fe_totfa_recession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==1, fe vce(robust)
+xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==1, fe vce(robust)
 
 outreg2 using regression_table_fe_totfa_recession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3) drop(i.qdate)
 
-xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==5, fe vce(robust)
+xtreg ltotfa linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==5, fe vce(robust)
 
 outreg2 using regression_table_fe_totfa_recession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3) drop(i.qdate)
 
@@ -424,15 +422,15 @@ outreg2 using regression_table_fe_totfa_recession.doc, append se ctitle("Highest
 
 xtset panelid qdate
 
-xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate, fe vce(robust)
+xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college i.qdate, fe vce(robust)
 
 outreg2 using regression_table_fe_tottr_recession.doc, replace se ctitle("All Income Groups") dec(2) sdec(3)
 
-xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==1, fe vce(robust)
+xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==1, fe vce(robust)
 
 outreg2 using regression_table_fe_tottr_recession.doc, append se ctitle("Lowest Quintile") dec(2) sdec(3)
 
-xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college cpi cpi_entavg i.qdate if inccat==5, fe vce(robust)
+xtreg ltottr linc age_ref fam_size perslt18 child persot64 male married white college i.qdate if inccat==5, fe vce(robust)
 
 outreg2 using regression_table_fe_tottr_recession.doc, append se ctitle("Highest Quintile") dec(2) sdec(3) drop(i.qdate)
 
